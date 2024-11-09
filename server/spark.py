@@ -1,6 +1,6 @@
 import os
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import to_timestamp, sum as _sum, date_format, split
+from pyspark.sql.functions import to_timestamp, sum as _sum, date_format, split, col
 
 # Create Spark session
 spark = SparkSession.builder.appName("SalesAggregation").getOrCreate()
@@ -82,7 +82,7 @@ def process_logs(input_dir, output_base_dir):
         'hour',
         'product'
     ).agg(
-        _sum('price').alias('total_price')  # Sum of price for each product
+        _sum(col('price') * col('quantity')).alias('total_price')  # Sum of price * quantity for each product
     )
 
     # Show the aggregated data
@@ -98,10 +98,18 @@ def process_logs(input_dir, output_base_dir):
     print("Showing the final output before writing to disk:")
     df_output.show(5, truncate=False)
 
-    # Write the output to a file (using overwrite mode)
-    output_path = os.path.join(output_base_dir, 'output.txt')
-    print(f"Writing output to {output_path}")
-    df_output.write.mode("overwrite").csv(output_path, header=True)
+    # Prepare the output data as a single string to write to the .txt file
+    output_data = df_output.rdd.map(lambda row: f"{row['hour']}, {row['product']}, {row['total_price']}").collect()
+
+    # Define the output file path
+    output_path = os.path.join(output_base_dir, '202411091111.txt')
+
+    # Write the result to a text file
+    with open(output_path, 'w') as f:
+        for line in output_data:
+            f.write(line + "\n")
+    
+    print(f"Data has been written to {output_path}")
 
 # Specify input and output base directories
 input_dir = "/app/logs"  # Base directory for log files

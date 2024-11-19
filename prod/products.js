@@ -42,9 +42,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const buyBtn = card.querySelector('.buy-btn');
             buyBtn.addEventListener('click', (e) => {
                 e.preventDefault();
+                e.stopPropagation();
                 logEvent('buy', product.title, 1, product.price);
+            });
+            card.addEventListener('click', (e) => {
+                e.preventDefault();
                 window.location.href = `product-detail.html?id=${product.id}`;
             });
+            
 
             productList.appendChild(card);
         });

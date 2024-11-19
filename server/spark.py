@@ -1,4 +1,6 @@
 import os
+from datetime import datetime
+import pytz
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import to_timestamp, sum as _sum, date_format, split, col
 
@@ -8,7 +10,13 @@ spark = SparkSession.builder.appName("SalesAggregation").getOrCreate()
 # Function to process the log files and generate the report
 def process_logs(input_dir, output_base_dir):
     # Define the static directory to read from
-    log_dir_path = os.path.join(input_dir, '2024110911')
+    gmt_plus_1 = pytz.timezone("Etc/GMT-1")
+    current_timestamp = datetime.now(gmt_plus_1).strftime('%Y%m%d%H')
+    print("--------------------------------------------------------")
+    print(current_timestamp)
+    print("--------------------------------------------------------")
+    log_dir_path = os.path.join(input_dir, current_timestamp)
+
 
     # Check if the directory exists
     if not os.path.exists(log_dir_path):
@@ -99,10 +107,10 @@ def process_logs(input_dir, output_base_dir):
     df_output.show(5, truncate=False)
 
     # Prepare the output data as a single string to write to the .txt file
-    output_data = df_output.rdd.map(lambda row: f"{row['hour']}, {row['product']}, {row['total_price']}").collect()
+    output_data = df_output.rdd.map(lambda row: f"{row['hour']}| {row['product']}| {row['total_price']}").collect()
 
     # Define the output file path
-    output_path = os.path.join(output_base_dir, '202411091111.txt')
+    output_path = os.path.join(output_base_dir, current_timestamp+".txt")
 
     # Write the result to a text file
     with open(output_path, 'w') as f:

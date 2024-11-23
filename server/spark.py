@@ -1,6 +1,7 @@
 import os
 from datetime import datetime
 import pytz
+import time
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import to_timestamp, sum as _sum, date_format, split, col
 
@@ -13,7 +14,6 @@ def process_logs(input_dir, output_base_dir):
     print(current_timestamp)
     print("--------------------------------------------------------")
     log_dir_path = os.path.join(input_dir, current_timestamp)
-
 
     if not os.path.exists(log_dir_path):
         print(f"Log directory does not exist: {log_dir_path}")
@@ -87,17 +87,20 @@ def process_logs(input_dir, output_base_dir):
 
     output_data = df_output.rdd.map(lambda row: f"{row['hour']}| {row['product']}| {row['total_price']}").collect()
 
-    output_path = os.path.join(output_base_dir, current_timestamp+".txt")
+    output_path = os.path.join(output_base_dir, current_timestamp + ".txt")
 
     with open(output_path, 'w') as f:
         for line in output_data:
             f.write(line + "\n")
-    
+
     print(f"Data has been written to {output_path}")
 
 input_dir = "/app/logs"  
-output_base_dir = "/app/output"  
+output_base_dir = "/app/output"
 
-process_logs(input_dir, output_base_dir)
+while True:
+    process_logs(input_dir, output_base_dir)
+    
+    time.sleep(3600)
 
 spark.stop()

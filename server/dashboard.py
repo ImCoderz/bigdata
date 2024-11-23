@@ -105,6 +105,6 @@ if __name__ == "__main__":
     output_directory = "/home/abderrahmane/Desktop/bigdata/server/output"
     
     start_date = "2024-11-18"
-    end_date = "2024-11-20"
+    end_date = "2024-11-25"
     
     generate_sales_dashboard(output_directory, start_date, end_date)

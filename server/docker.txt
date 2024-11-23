@@ -1,0 +1,4 @@
+docker run --rm \
+  -v /home/abderrahmane/Desktop/bigdata/server:/app \
+  bitnami/spark:latest \
+  /bin/bash -c "pip install pytz && /opt/bitnami/spark/bin/spark-submit /app/spark.py"

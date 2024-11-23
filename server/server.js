@@ -10,7 +10,6 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static('public'));
 
-// Helper function to create file path based on timestamp
 const createLogFilePath = () => {
     const now = new Date();
     const year = now.getFullYear();
@@ -26,11 +25,10 @@ const createLogFilePath = () => {
     return filePath;
 };
 
-// Log events to individual files
 function formatTimestamp(timestamp) {
     const date = new Date(timestamp);
     const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed, so adding 1
+    const month = String(date.getMonth() + 1).padStart(2, '0'); 
     const day = String(date.getDate()).padStart(2, '0');
     const hours = String(date.getHours()).padStart(2, '0');
     const minutes = String(date.getMinutes()).padStart(2, '0');
@@ -42,16 +40,12 @@ function formatTimestamp(timestamp) {
 app.post('/logEvent', (req, res) => {
     const { timestamp, action, product, quantity, price, route, agent } = req.body;
 
-    // Format the timestamp to the desired format
     const formattedTimestamp = formatTimestamp(timestamp);
 
-    // Prepare the log message with action at the start
     const logMessage = `${formattedTimestamp}|${action}|${product}|${quantity}|${price}|${route}\n`;
 
-    // Create the log file path
     const filePath = createLogFilePath();
 
-    // Append the log message to the log file
     fs.appendFile(filePath, logMessage, (err) => {
         if (err) {
             console.error('Error logging event:', err);
@@ -62,7 +56,6 @@ app.post('/logEvent', (req, res) => {
     });
 });
 
-// Start the server
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
